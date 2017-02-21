@@ -383,10 +383,37 @@ public class JournalComparisonPanel extends ContentPanel {
             String lastIndex = path.substring(path.lastIndexOf(LEFT_BRAKCET));
             transferPath = temp.concat(lastIndex.replaceAll("\\[\\d+\\]", ""));
             model = modelMap.get(transferPath);
+            if(model == null){
+                model = getModelByPath(transferPath, "");
+            }
+        } else if (!path.endsWith(RIGHT_BRAKCET) && model == null) {
+            String temp = path.substring(0, path.indexOf(RIGHT_BRAKCET) + 1);
+            String lastIndex = path.substring(path.indexOf(RIGHT_BRAKCET) + 1);
+            transferPath = temp.replaceAll("\\[\\d+\\]", "").concat(lastIndex);
+            model = modelMap.get(transferPath);
+            if(model == null){
+                model = getModelByPath(transferPath, "");
+            }
         }
 
         tree.getSelectionModel().select(false, model);
         tree.scrollIntoView(model);
+    }
+
+    private JournalTreeModel getModelByPath(String path, String lastIndex) {
+        JournalTreeModel model = modelMap.get(path.concat(lastIndex));
+        if (model == null && path.contains(LEFT_BRAKCET) && path.contains(RIGHT_BRAKCET)) {
+            String temp = path.substring(0, path.lastIndexOf(LEFT_BRAKCET));
+            String lastIndexStr = path.substring(path.lastIndexOf(LEFT_BRAKCET));
+            String transferPath = temp.concat(lastIndexStr.replaceAll("\\[\\d+\\]", "")).concat(lastIndex);
+            model = modelMap.get(transferPath);
+            if (model == null) {
+                return getModelByPath(temp, lastIndexStr);
+            } else {
+                return model;
+            }
+        }
+        return model;
     }
 
     public TreePanel<JournalTreeModel> getTree() {
